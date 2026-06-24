@@ -1,22 +1,22 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -e
 
-echo "🔧 LPAM Bootstrap: Installing dependencies and initializing empty brain..."
+echo "Setting up Harness for gbrain framework..."
 
-# Backend: gbrain core engine
-echo "📦 Cloning gbrain core engine..."
+# Backend: clone gbrain core engine
+echo "Setting up backend..."
 rm -rf backend
 git clone https://github.com/DYAI2025/gbrain.git backend
 cd backend
+# Install dependencies
 bun install
-echo "🧠 Initializing PGLite brain (empty, content-agnostic)..."
+# Initialize a fresh brain (PGLite) inside the backend directory
+echo "Initializing brain (PGLite) in ./brain..."
 gbrain init --pglite --path ./brain
 cd ..
 
-# Frontend: gbrain-atlas
-echo "📦 Cloning gbrain-atlas frontend..."
+# Frontend: clone gbrain-atlas
+echo "Setting up frontend..."
 rm -rf frontend
 git clone https://github.com/DYAI2025/gbrain-atlas.git frontend
-
-echo "✅ LPAM bootstrap complete."
-echo "To start the stack: docker compose up -d"
+echo "Setup complete."
