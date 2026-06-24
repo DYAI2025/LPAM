@@ -1,0 +1,21 @@
+# Backend Dockerfile for gbrain core engine
+FROM oven/bun:latest as base
+
+WORKDIR /app
+
+# Copy package files
+COPY backend/package.json backend/bun.lockb ./
+RUN bun install --frozen-lockfile
+
+# Copy source code
+COPY backend/ .
+
+# Expose port (default 3000 for gbrain serve --http)
+EXPOSE 3000
+
+# Environment variables (can be overridden at runtime)
+ENV GBRAIN_HTTP_CORS_ORIGIN=*
+ENV PORT=3000
+
+# Command to start the HTTP MCP server
+CMD ["gbrain", "serve", "--http"]
