@@ -8,11 +8,17 @@ services:
     volumes:
       # Persist the brain directory across container restarts
       - ./backend/brain:/app/brain
+      # Mount the real Plumbline host dir for the watcher (Read-Only)
+      - /root/Plumbline:/root/Plumbline:ro
+      # Persistent Obsidian Vault for mirrored markdown files
+      - /root/obsidian-vault:/app/vault
     ports:
       - "3000:3000"   # Host:Container – adjust if you change PORT env
     environment:
       - GBRAIN_HTTP_CORS_ORIGIN=*   # or set to your frontend URL in prod
       - PORT=3000
+      - OLLAMA_HOST=http://172.17.0.1:11434
+      - QDRANT_HOST=http://172.17.0.1:6333
     restart: unless-stopped
 
   frontend:
