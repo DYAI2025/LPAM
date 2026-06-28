@@ -1,0 +1,122 @@
+# Plumbline Loop Engineering Memory Graph - v0
+# This file defines the loop contract for the Plumbline MVP.
+
+id: plumbline-loop-engineering-memory-graph-v0
+version: 0.1.0
+description: |
+  A minimal loop that generates the core artifact types for the Plumbline memory system:
+  loop_run, watcher_check, retro_record, memory_event, graph_node, graph_edge, telegram_report.
+  It then validates the artifacts and projects the productive graph (excluding fake artifacts).
+
+phases:
+  - name: generate_artifacts
+    description: Generate the initial set of artifacts for the loop.
+    outputs:
+      - loop_run
+      - watcher_check
+      - retro_record
+      - memory_event
+      - graph_node
+      - graph_edge
+      - telegram_report
+
+  - name: validate_artifacts
+    description: Validate all generated artifacts against their schemas.
+    inputs: [loop_run, watcher_check, retro_record, memory_event, graph_node, graph_edge, telegram_report]
+
+  - name: project_graph
+    description: Project the productive graph, excluding artifacts ineligible for global projection.
+    inputs: [graph_node, graph_edge]
+    outputs:
+      - productive_graph
+
+  - name: generate_report
+    description: Generate a telegram-ready report artifact.
+    inputs: [loop_run]
+    outputs:
+      - telegram_report
+
+artifacts:
+  loop_run:
+    description: The root artifact of the loop, triggering the process and referencing generated artifacts.
+    required_fields:
+      - id
+      - timestamp
+      - trigger
+      - generated_artifacts
+
+  watcher_check:
+    description: A record of the system's health or status after the loop run.
+    required_fields:
+      - id
+      - timestamp
+      - loop_run_id
+      - status
+      - details
+
+  retro_record:
+    description: A record of lessons learned and adjustments made after the loop run.
+    required_fields:
+      - id
+      - timestamp
+      - loop_run_id
+      - lessons_learned
+      - adjustments
+
+  memory_event:
+    description: A discrete event that occurred during the loop run.
+    required_fields:
+      - id
+      - timestamp
+      - loop_run_id
+      - event_type
+      - content
+
+  graph_node:
+    description: A node in the memory graph.
+    required_fields:
+      - id
+      - timestamp
+      - loop_run_id
+      - label
+      - type
+      - properties
+      - eligible_for_global_projection
+
+  graph_edge:
+    description: An edge connecting two nodes in the memory graph.
+    required_fields:
+      - id
+      - timestamp
+      - loop_run_id
+      - source_id
+      - target_id
+      - label
+      - type
+      - properties
+      - eligible_for_global_projection
+
+  telegram_report:
+    description: A report artifact ready to be sent via Telegram (or other notification system).
+    required_fields:
+      - id
+      - timestamp
+      - loop_run_id
+      - delivery_status
+      - content
+
+# Fake data definitions for testing quarantine
+fake_artifacts:
+  - type: graph_node
+    id: fake_node_001
+    properties:
+      eligible_for_global_projection: false
+  - type: graph_edge
+    id: fake_edge_001
+    properties:
+      eligible_for_global_projection: false
+
+# Projection rules
+projection:
+  rule: Include only artifacts where `eligible_for_global_projection` is true.
+  output_file: data/graph_projection/productive_graph.json

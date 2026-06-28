@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    volumes:
+      # Persist the brain directory across container restarts
+      - ./backend/brain:/app/brain
+    ports:
+      - "3000:3000"   # Host:Container – adjust if you change PORT env
+    environment:
+      - GBRAIN_HTTP_CORS_ORIGIN=*   # or set to your frontend URL in prod
+      - PORT=3000
+      - OLLAMA_HOST=http://172.17.0.1:11434
+      - QDRANT_HOST=http://172.17.0.1:6333
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8080:80"     # Host:Container
+    depends_on:
+      - backend
+    restart: unless-stopped

@@ -1,0 +1,14 @@
+{
+  "artifact_type": "loop_run",
+  "id": "loop_run_001",
+  "timestamp": "2026-06-25T12:00:00Z",
+  "trigger": "manual_trigger",
+  "generated_artifacts": [
+    "watcher_check_001",
+    "retro_record_001",
+    "memory_event_001",
+    "graph_node_001",
+    "graph_edge_001",
+    "telegram_report_001"
+  ]
+}

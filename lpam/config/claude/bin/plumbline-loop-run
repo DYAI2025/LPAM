@@ -1,0 +1,25 @@
+#!/bin/bash
+# plumbline-loop-run
+# Wrapper script to run the Plumbline loop runner
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PYTHON_SCRIPT="$SCRIPT_DIR/../lib/plumbline_loop_runner.py"
+
+# Default data directory
+DATA_DIR="data"
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --data-dir)
+            DATA_DIR="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+python3 "$PYTHON_SCRIPT" --data-dir "$DATA_DIR"
