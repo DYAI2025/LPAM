@@ -30,7 +30,19 @@ leak_paths=()
 [ -d "$BRAIN_DIR" ] && leak_paths+=("$BRAIN_DIR")
 
 if [ "${#leak_paths[@]}" -gt 0 ]; then
-  leaks=$(rg -n --hidden -i "API_KEY|SECRET|PASSWORD|TOKEN|PRIVATE KEY" "${leak_paths[@]}" -g '!**/.git/**' -g '!**/node_modules/**' -g '!**/*.example*' || true)
+  leaks=""
+  if [ -d "$VAULT_DIR" ]; then
+    vault_leaks=$(rg -n --hidden -i "API_KEY|SECRET|PASSWORD|TOKEN|PRIVATE KEY" "$VAULT_DIR" -g '!**/.git/**' -g '!**/node_modules/**' -g '!**/*.example*' || true)
+    leaks+="$vault_leaks"
+  fi
+  if [ -d "$BRAIN_DIR" ]; then
+    # PGLite stores data in binary files; force text mode so ripgrep scans past NUL bytes.
+    brain_leaks=$(rg -a -n --hidden -i "API_KEY|SECRET|PASSWORD|TOKEN|PRIVATE KEY" "$BRAIN_DIR" -g '!**/.git/**' -g '!**/node_modules/**' -g '!**/*.example*' || true)
+    if [ -n "$leaks" ] && [ -n "$brain_leaks" ]; then
+      leaks+=$'\n'
+    fi
+    leaks+="$brain_leaks"
+  fi
   if [ -n "$leaks" ]; then
     echo "PRIVACY LEAK DETECTED:"
     echo "$leaks"
