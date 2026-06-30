@@ -27,8 +27,15 @@ echo "==> Installing backend deps (bun install)…"
 bun install
 
 # gbrain CLI is provided by the backend package after install.
-GBRAIN_BIN="gbrain"
-command -v gbrain >/dev/null 2>&1 || GBRAIN_BIN="bunx gbrain"
+if command -v gbrain >/dev/null 2>&1; then
+  GBRAIN_BIN="gbrain"
+elif command -v bunx >/dev/null 2>&1; then
+  GBRAIN_BIN="bunx gbrain"
+else
+  echo "Error: neither 'gbrain' nor 'bunx' is available on PATH."
+  echo "Please install the gbrain CLI (via the backend package) or bun (for 'bunx gbrain') before running this script."
+  exit 1
+fi
 
 if [ ! -e "$BRAIN_DIR" ]; then
   echo "==> Initializing PGLite brain at backend/$BRAIN_DIR…"
