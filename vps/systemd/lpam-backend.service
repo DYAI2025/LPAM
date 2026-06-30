@@ -1,0 +1,23 @@
+# LPAM gbrain backend — MCP server + PGLite brain.
+# TEMPLATE: vps/bootstrap.sh substitutes the @@TOKENS@@ and installs to
+# /etc/systemd/system/. Tokens:
+#   @@INSTALL_DIR@@  absolute path to the cloned LPAM repo (backend/ lives under it)
+#   @@BUN_BIN@@      path to the bun binary (e.g. /root/.bun/bin/bun)
+[Unit]
+Description=LPAM gbrain backend (MCP + PGLite brain)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=@@INSTALL_DIR@@/backend
+ExecStart=@@BUN_BIN@@ run src/cli.ts serve --http --bind 0.0.0.0
+Restart=always
+RestartSec=3
+Environment=PORT=3131
+Environment=GBRAIN_HTTP_CORS_ORIGIN=*
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,22 @@
+# Hermes Desktop API (dashboard) — the endpoint the desktop app connects to in
+# remote mode (via the local SSH tunnel → 127.0.0.1:9119).
+# TEMPLATE. Tokens:
+#   @@HERMES_BIN@@       path to the hermes CLI (e.g. /root/.local/bin/hermes)
+#   @@DASHBOARD_TOKEN@@  shared session token — bootstrap.sh GENERATES a random one.
+#                        NEVER commit a real token. The local connection.json must match.
+[Unit]
+Description=Hermes Desktop API (dashboard) for remote brain
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root
+Environment=PATH=/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=HERMES_DASHBOARD_SESSION_TOKEN=@@DASHBOARD_TOKEN@@
+ExecStart=@@HERMES_BIN@@ dashboard --no-open --host 127.0.0.1 --port 9119 --skip-build
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

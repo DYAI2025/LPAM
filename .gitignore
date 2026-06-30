@@ -20,6 +20,7 @@ __pycache__/
 # but DO commit the template:
 !.env.example
 *.token
+.dashboard-token
 connection.json
 auth.json
 desktop-remote.token
