@@ -1,22 +1,42 @@
 #!/bin/bash
-set -e
+# LPAM installer — populate submodules (gbrain backend + gbrain-atlas frontend),
+# install backend deps, initialize a fresh PGLite brain. Idempotent.
+set -euo pipefail
+cd "$(dirname "$0")"
 
-echo "Setting up Harness for gbrain framework..."
+echo "==> LPAM setup"
 
-# Backend: clone gbrain core engine
-echo "Setting up backend..."
-rm -rf backend
-git clone https://github.com/DYAI2025/gbrain.git backend
+# 1. Submodules. Prefer .gitmodules: pins backend/frontend to the commits this
+#    repo recorded (reproducible for anyone cloning). Fall back to upstream tips
+#    only if .gitmodules is somehow missing.
+if [ -f .gitmodules ]; then
+  echo "==> Initializing submodules at pinned commits…"
+  git submodule sync --recursive
+  git submodule update --init --recursive
+else
+  echo "==> No .gitmodules found — cloning upstream tips (fallback)…"
+  rm -rf backend frontend
+  git clone https://github.com/DYAI2025/gbrain.git backend
+  git clone https://github.com/DYAI2025/gbrain-atlas.git frontend
+fi
+
+# 2. Backend dependencies (bun) + PGLite brain.
+BRAIN_DIR="${GBRAIN_BRAIN_DIR:-./brain}"   # relative to backend/, matches compose mount ./backend/brain
 cd backend
-# Install dependencies
+echo "==> Installing backend deps (bun install)…"
 bun install
-# Initialize a fresh brain (PGLite) inside the backend directory
-echo "Initializing brain (PGLite) in ./brain..."
-gbrain init --pglite --path ./brain
+
+# gbrain CLI is provided by the backend package after install.
+GBRAIN_BIN="gbrain"
+command -v gbrain >/dev/null 2>&1 || GBRAIN_BIN="bunx gbrain"
+
+if [ ! -e "$BRAIN_DIR" ]; then
+  echo "==> Initializing PGLite brain at backend/$BRAIN_DIR…"
+  $GBRAIN_BIN init --pglite --path "$BRAIN_DIR"
+else
+  echo "==> Brain already exists at backend/$BRAIN_DIR — skipping init."
+fi
 cd ..
 
-# Frontend: clone gbrain-atlas
-echo "Setting up frontend..."
-rm -rf frontend
-git clone https://github.com/DYAI2025/gbrain-atlas.git frontend
-echo "Setup complete."
+echo "==> Setup complete."
+echo "    Next: cp .env.example .env  (fill values), then: docker compose up --build"
