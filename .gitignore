@@ -1,42 +1,39 @@
-# Node modules
-backend/node_modules/
+# Node / Bun
 node_modules/
+backend/node_modules/
+frontend/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-
-# Bun
 bun.lockb
 .bun
-bun
-bun
-backend/node_modules
-/bun.lockb
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Environment variables
+# Environment / secrets — never commit real values
 .env
 .env.*
+# but DO commit the template:
+!.env.example
+*.token
+connection.json
+auth.json
+desktop-remote.token
 
-# Logs
+# Logs / runtime
 logs
 *.log
-
-# Runtime data
 pids
 *.pid
 *.seed
 
-# Coverage directory used by tools like istanbul
+# Coverage / build
 coverage/
 .lcov/
-
-# Build outputs
 /dist
 /build
 /tmp
@@ -55,7 +52,6 @@ coverage/
 .DS_Store
 Thumbs.db
 
-# Specific to our project
+# Project — runtime data (brain is per-user, never committed)
 backend/brain/
-frontend/node_modules/
-backend/node_modules/
+vault/
