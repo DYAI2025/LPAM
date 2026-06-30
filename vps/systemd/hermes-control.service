@@ -1,0 +1,22 @@
+# Hermes Control Interface (HCI) — OPTIONAL loopback control surface.
+# Not required for the core desktop-app→brain flow (that uses hermes-dashboard).
+# Only install if you run the separate hermes-control-interface component.
+# TEMPLATE. Token:
+#   @@HCI_DIR@@  install dir of hermes-control-interface (e.g. /opt/hermes-control-interface)
+[Unit]
+Description=Hermes Control Interface
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=@@HCI_DIR@@
+EnvironmentFile=@@HCI_DIR@@/.env
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/var/log/hermes-control.log
+StandardError=append:/var/log/hermes-control.log
+
+[Install]
+WantedBy=multi-user.target

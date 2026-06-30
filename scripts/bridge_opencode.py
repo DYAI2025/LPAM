@@ -14,8 +14,13 @@ def call_opencode_headless(prompt_text):
     ]
     
     try:
-        # Führt OpenCode aus und fängt den reinen Text-Output ab
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        # Führt OpenCode aus und fängt den reinen Text-Output ab.
+        # SAFE: argument-vector form with shell=False — `prompt_text` is passed as a
+        # single argv element, never parsed by a shell, so it cannot inject a command.
+        # The opengrep "dangerous-subprocess-use-audit" rule is a heuristic false
+        # positive here (it flags any non-literal first arg).
+        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True, shell=False)
         
         print("\n=== OPENCODE OUTPUT AGENT ===")
         if result.stdout.strip():
