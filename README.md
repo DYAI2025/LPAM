@@ -172,7 +172,7 @@ bash install.sh
 The installer will:
 
 1. remove any existing `backend` directory;
-2. clone `https://github.com/DYAI2025/gbrain.git` into `backend`;
+2. clone `https://github.com/garrytan/gbrain.git` into `backend` (upstream GBrain);
 3. install backend dependencies with Bun;
 4. initialize a fresh PGLite brain in `backend/brain`;
 5. remove any existing `frontend` directory;
