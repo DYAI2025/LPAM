@@ -34,13 +34,24 @@ if [ -z "${DASHBOARD_TOKEN:-}" ]; then
 fi
 
 render() {  # render <template> -> stdout
-  sed -e "s#@@INSTALL_DIR@@#${INSTALL_DIR}#g" \
-      -e "s#@@HERMES_HOME@@#${HERMES_HOME}#g" \
-      -e "s#@@BUN_BIN@@#${BUN_BIN}#g" \
-      -e "s#@@HERMES_BIN@@#${HERMES_BIN}#g" \
-      -e "s#@@HCI_DIR@@#${HCI_DIR}#g" \
-      -e "s#@@DASHBOARD_TOKEN@@#${DASHBOARD_TOKEN}#g" \
-      "$1"
+  local template="$1"
+  local install_dir hermes_home bun_bin hermes_bin hci_dir dashboard_token
+
+  # Escape characters that are special in sed replacements: &, #, and \
+  install_dir=$(printf '%s' "${INSTALL_DIR}"    | sed 's/[&#\\]/\\&/g')
+  hermes_home=$(printf '%s' "${HERMES_HOME}"    | sed 's/[&#\\]/\\&/g')
+  bun_bin=$(printf '%s' "${BUN_BIN}"           | sed 's/[&#\\]/\\&/g')
+  hermes_bin=$(printf '%s' "${HERMES_BIN}"     | sed 's/[&#\\]/\\&/g')
+  hci_dir=$(printf '%s' "${HCI_DIR}"           | sed 's/[&#\\]/\\&/g')
+  dashboard_token=$(printf '%s' "${DASHBOARD_TOKEN}" | sed 's/[&#\\]/\\&/g')
+
+  sed -e "s#@@INSTALL_DIR@@#${install_dir}#g" \
+      -e "s#@@HERMES_HOME@@#${hermes_home}#g" \
+      -e "s#@@BUN_BIN@@#${bun_bin}#g" \
+      -e "s#@@HERMES_BIN@@#${hermes_bin}#g" \
+      -e "s#@@HCI_DIR@@#${hci_dir}#g" \
+      -e "s#@@DASHBOARD_TOKEN@@#${dashboard_token}#g" \
+      "$template"
 }
 
 echo "==> Installing units: $UNITS"
