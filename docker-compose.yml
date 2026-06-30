@@ -29,6 +29,8 @@ services:
     restart: unless-stopped
 
   frontend:
+    profiles:
+      - frontend
     build:
       context: .
       dockerfile: Dockerfile.frontend

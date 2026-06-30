@@ -1,0 +1,34 @@
+#!/bin/bash
+# plumbline-memory-schema-check
+# Wrapper script to run the Plumbline memory schema validator
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PYTHON_SCRIPT="$SCRIPT_DIR/../lib/plumbline_memory_schema_validator.py"
+
+# Default data directory
+DATA_DIR="data"
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --data-dir)
+            DATA_DIR="$2"
+            shift 2
+            ;;
+        --json)
+            JSON_FLAG="--json"
+            shift
+            ;;
+        *)
+            # Assume it's a file to validate
+            FILE_TO_VALIDATE="$1"
+            shift
+            ;;
+    esac
+done
+
+if [ -n "$FILE_TO_VALIDATE" ]; then
+    python3 "$PYTHON_SCRIPT" --file "$FILE_TO_VALIDATE" $JSON_FLAG
+else
+    python3 "$PYTHON_SCRIPT" --data-dir "$DATA_DIR" $JSON_FLAG
+fi

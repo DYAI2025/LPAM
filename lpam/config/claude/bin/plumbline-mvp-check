@@ -1,0 +1,46 @@
+#!/bin/bash
+# plumbline-mvp-check
+# Runs the MVP validation suite for the Plumbline MVP.
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo "Running Plumbline MVP validation suite..."
+
+# Run the schema validator tests
+echo "1. Running memory schema validator tests..."
+python3 -m pytest "$SCRIPT_DIR/../tests/test_memory_schema_validator.py" -v
+SCHEMA_TEST_RESULT=$?
+
+# Run the graph projection tests
+echo "2. Running memory graph projection tests..."
+python3 -m pytest "$SCRIPT_DIR/../tests/test_memory_graph_projection.py" -v
+PROJECTION_TEST_RESULT=$?
+
+# Run the fake data quarantine tests
+echo "3. Running fake data quarantine tests..."
+python3 -m pytest "$SCRIPT_DIR/../tests/test_fake_data_quarantine.py" -v
+QUARANTINE_TEST_RESULT=$?
+
+# Run the loop runner bootstrap tests
+echo "4. Running loop runner bootstrap tests..."
+python3 -m pytest "$SCRIPT_DIR/../tests/test_loop_runner_bootstrap.py" -v
+LOOP_TEST_RESULT=$#
+
+# Run the schema validator on the data directory
+echo "5. Running schema validator on data directory..."
+"$SCRIPT_DIR/plumbline-memory-schema-check" --data-dir data --json"
+SCHEMA_CHECK_RESULT=$?
+
+# Run the graph projector on the data directory
+echo "6. Running graph projector on data directory..."
+"$SCRIPT_DIR/plumbline-graph-project --data-dir data --out data/graph_projection/productive_graph.json --json"
+GRAPH_PROJECT_RESULT=$?
+
+# Determine overall success
+if [ $SCHEMA_TEST_RESULT -eq 0 ] && [ $PROJECTION_TEST_RESULT -eq 0 ] && [ $QUARANTINE_TEST_RESULT -eq 0 ] && [ $LOOP_TEST_RESULT -eq 0 ] && [ $SCHEMA_CHECK_RESULT -eq 0 ] && [ $GRAPH_PROJECT_RESULT -eq 0 ]; then
+    echo "MVP validation suite PASSED."
+    exit 0
+else
+    echo "MVP validation suite FAILED."
+    exit 1
+fi
