@@ -18,4 +18,4 @@ ENV GBRAIN_HTTP_CORS_ORIGIN=*
 ENV PORT=3000
 
 # Command to start the HTTP MCP server
-CMD ["gbrain", "serve", "--http"]
+CMD ["run", "src/cli.ts", "serve", "--http", "--brain", "/app/brain"]
