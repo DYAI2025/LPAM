@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- LaunchAgent: keep the 9119 SSH tunnel up. TEMPLATE — @@HERMES_BRIDGE@@ is
+     substituted by local/bootstrap.sh with the install dir (default ~/.hermes-bridge). -->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.hermes.tunnel9119</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>@@HERMES_BRIDGE@@/tunnel-9119.sh</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+    <key>StandardOutPath</key>
+    <string>@@HERMES_BRIDGE@@/tunnel9119.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>@@HERMES_BRIDGE@@/tunnel9119.err.log</string>
+</dict>
+</plist>

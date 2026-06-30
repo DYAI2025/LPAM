@@ -1,0 +1,11 @@
+# Append to ~/.ssh/config. Defines the `hermes-brain` alias the local glue uses.
+# Replace @@VPS_HOST@@ with your VPS hostname or Tailscale name (see docs/tailscale.md),
+# and the IdentityFile with your key. ControlMaster multiplexes for fast repeat SSH.
+Host hermes-brain
+  HostName @@VPS_HOST@@
+  User root
+  IdentityFile ~/.ssh/id_ed25519
+  IdentitiesOnly yes
+  ControlMaster auto
+  ControlPath ~/.ssh/cm-%r@%h:%p
+  ControlPersist 600
