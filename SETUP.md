@@ -146,7 +146,7 @@ Rebuild: `…/scratchpad/build_vault.py`. Open: `obsidian://open?path=/Users/ben
 
 - osascript over SSH = `-1743` (no Aqua session) → must go through an in-session LaunchAgent broker.
 - macOS has no `setsid`/`timeout` → use `nohup … &` / `gtimeout`. LaunchAgents get a minimal PATH → export `/opt/homebrew/bin`.
-- `open -a` does NOT inherit env vars → launch the inner MacOS binary directly when env is needed.
+- `open -a` does NOT inherit env vars → launch the inner macOS binary directly when env is needed.
 - `ssh -L 9119:…` binds IPv6-only → use `-L 127.0.0.1:9119:…`.
 - gbrain PGLite is single-writer → CLI maintenance contends with the running daemon; stop the daemon for `config set`/`embed`, and DON'T run two operators (Hermes + you) on it at once.
 - gbrain `embedding_model` is immutable post-init → re-init to change embedder; re-init wipes `access_tokens` → re-mint the MCP bearer.
