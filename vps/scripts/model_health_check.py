@@ -59,6 +59,7 @@ def read_env(key):
             ln = ln.strip()
             if ln.startswith(key + "="):
                 v = ln.split("=", 1)[1].strip()
+                v = re.sub(r"\s+#.*$", "", v)  # strip shell-style trailing inline comment (matches `. .env`)
                 return v.strip("'\" ").strip()
     except Exception as e:
         log(f"ERROR reading {key} from .env: {e}")
@@ -124,7 +125,9 @@ def scrub_statedb(dead, repl):
         if os.path.exists(bak):
             os.remove(bak)
         con = sqlite3.connect(DB, timeout=10)
-        con.execute(f"VACUUM INTO '{bak}'")  # WAL-safe snapshot backup
+        # VACUUM INTO cannot bind its target path; `bak` is a server-side constant
+        # (derived from the DB const), never user input.
+        con.execute(f"VACUUM INTO '{bak}'")  # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query
         con.close()
     except Exception:
         try: shutil.copy(DB, bak)
@@ -132,8 +135,10 @@ def scrub_statedb(dead, repl):
     con = sqlite3.connect(DB, timeout=10)
     con.execute("PRAGMA busy_timeout=10000")
     n = 0
+    # `col` iterates a FIXED literal allowlist (never user input); the dead/replacement
+    # values are bound as parameters. Only the allowlisted column identifier is interpolated.
     for col in ("model", "model_config", "system_prompt"):
-        cur = con.execute(
+        cur = con.execute(  # nosemgrep: python.sqlalchemy.security.sqlalchemy-execute-raw-query
             f"UPDATE sessions SET {col}=REPLACE({col}, ?, ?) WHERE {col} LIKE ?",
             (dead, repl, f"%{dead}%"))
         n += cur.rowcount
@@ -227,8 +232,9 @@ def main():
         total += scrub_statedb(d, repl)
     log(f"state.db scrubbed: {total} session-column updates")
 
-    # restart services so the new default loads
-    subprocess.run(["systemctl", "restart"] + SERVICES, check=False)
+    # restart services so the new default loads.
+    # SAFE: list-form, shell=False, SERVICES is a fixed module constant → no shell, not injectable.
+    subprocess.run(["systemctl", "restart"] + SERVICES, check=False, shell=False)  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit
     log(f"restarted: {SERVICES}")
 
     summary = "; ".join(f"{d} → {r}" for d, r in changes)

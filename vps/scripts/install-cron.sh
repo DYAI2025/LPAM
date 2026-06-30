@@ -21,7 +21,10 @@ chmod +x "$SCRIPT"
 LINE="$SCHEDULE HERMES_HOME=$HERMES_HOME $PYTHON $SCRIPT >> $LOG 2>&1"
 
 # Replace any existing watcher line; preserve the rest of the crontab.
-{ crontab -l 2>/dev/null | grep -vF "model_health_check.py" | grep -v '^# LPAM model-health watcher$'
+# Tolerate a missing/empty crontab (crontab -l and the grep -v filters can each exit non-zero).
+existing="$(crontab -l 2>/dev/null | grep -vF "model_health_check.py" | grep -v '^# LPAM model-health watcher$' || true)"
+{
+  if [ -n "$existing" ]; then printf '%s\n' "$existing"; fi
   echo "# LPAM model-health watcher"
   echo "$LINE"
 } | crontab -
