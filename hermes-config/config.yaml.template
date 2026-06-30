@@ -1,0 +1,93 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Hermes config OVERLAY — the LPAM customizations.
+#
+# This is NOT a full Hermes config. Hermes generates a complete config.yaml via
+# `hermes setup` / `hermes model` (schema is versioned — `_config_version`).
+# MERGE the blocks below into THAT file (~/.hermes/config.yaml); do not replace it.
+# See docs/hermes-install.md.
+#
+# Tokens to substitute before use:
+#   @@HERMES_HOME@@        absolute hermes home (e.g. /root/.hermes or ~/.hermes)
+# Secrets stay as ${VARNAME} — Hermes interpolates them from ~/.hermes/.env.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Primary model + provider. All LLM calls route via OpenRouter.
+model:
+  default: nvidia/nemotron-3-ultra-550b-a55b:free
+  provider: openrouter
+  base_url: https://openrouter.ai/api/v1
+
+# Fallback chain — MUST be a YAML list of {provider, model} dicts.
+# (A JSON string here fails schema validation and disables fallback entirely.)
+# Free models throttle (429); the model-health watcher (PR4) keeps these live.
+fallback_model:
+  - provider: openrouter
+    model: nvidia/nemotron-3-ultra-550b-a55b:free
+  - provider: openrouter
+    model: google/gemma-4-31b-it:free
+  - provider: openrouter
+    model: nvidia/nemotron-3-super-120b-a12b:free
+
+# gbrain as long-term memory, exposed as an MCP server.
+# Platforms inherit enabled MCP servers automatically unless a platform's
+# toolset list contains the "no_mcp" sentinel.
+mcp_servers:
+  gbrain:
+    url: ${GBRAIN_MCP_URL}            # e.g. http://127.0.0.1:3131/mcp
+    headers:
+      Authorization: Bearer ${MCP_GBRAIN_API_KEY}
+    enabled: true
+
+# The deterministic memory pipeline (see hermes-config/hooks/).
+# Copy both hooks to @@HERMES_HOME@@/hooks/ and chmod +x.
+hooks:
+  pre_llm_call:
+    - command: "@@HERMES_HOME@@/hooks/gbrain_peek.sh"
+      timeout: 8
+  post_llm_call:
+    - command: "@@HERMES_HOME@@/hooks/gbrain_promote.sh"
+      timeout: 8
+hooks_auto_accept: true
+
+memory:
+  memory_enabled: true
+
+# Keep routing simple/predictable (no auto cheap-model switching).
+smart_model_routing:
+  enabled: false
+
+# Voice. TTS via OpenAI gpt-4o-mini-tts (set VOICE_TOOLS_OPENAI_KEY); STT via Groq.
+# For fully LOCAL TTS, switch provider to `neutts` (neuphonic/neutts-air, CPU) or `piper`.
+tts:
+  provider: openai
+  openai:
+    model: gpt-4o-mini-tts
+    voice: alloy
+  edge:
+    voice: de-DE-FlorianMultilingualNeural   # free fallback, no key needed
+  neutts:
+    model: neuphonic/neutts-air-q4-gguf
+    device: cpu
+stt:
+  enabled: true
+  provider: groq
+  groq:
+    model: whisper-1
+  local:
+    model: base                              # whisper.cpp, fully local
+
+# Per-platform toolset allowlists. Telegram inherits gbrain MCP (no "no_mcp").
+# Trim/extend per channel; comment out platforms you don't use.
+platform_toolsets:
+  telegram:
+    - browser
+    - clarify
+    - code_execution
+    - cronjob
+    - delegation
+    - file
+    - image_gen
+    - memory
+    - session_search
+    - skills
+    - terminal
