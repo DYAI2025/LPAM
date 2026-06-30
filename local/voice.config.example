@@ -1,0 +1,19 @@
+# Voice config — copy to ~/.hermes-bridge/config (sourced by ptt-turn.sh).
+
+# --- TTS (macOS `say`) ---
+# Native `say` is used by default. Optionally set a voice/rate:
+#   TTS_VOICE="Anna"      # list installed voices with: say -v '?'
+#   TTS_RATE="180"        # words per minute
+TTS_VOICE=""
+TTS_RATE=""
+
+# --- STT (whisper.cpp) ---
+# Records from the default mic (sox `rec`), then transcribes with whisper-cli.
+# Download a model first, e.g.:
+#   whisper.cpp/models/download-ggml-model.sh base
+# then point STT_MODEL at the .bin (use an ABSOLUTE path).
+STT_MODEL="$HOME/whisper.cpp/models/ggml-base.bin"
+STT_LANG="en"
+REC_MAX="15"          # MAX seconds (safety ceiling); VAD stops earlier on silence. Override: ptt-turn.sh respects this.
+STT_PROMPT="Hermes"   # hotword bias for whisper — names/terms to favour, comma-separated.
+REC_SILENCE="1 0.1 2% 1 1.0 2%"  # sox VAD: start(0.1s >2%) / stop(1.0s <2%). Raise % in noisy rooms; lower in very quiet ones.
