@@ -6,7 +6,11 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GBRAIN_REPO="${GBRAIN_REPO:-https://github.com/garrytan/gbrain.git}"
+# NOTE: use the DYAI2025/gbrain FORK, not garrytan/gbrain upstream. The fork adds
+# the HTTP MCP server (`gbrain serve --http` → OAuth transport on :3131) that LPAM's
+# whole stack (Hermes desktop remote mode, the dashboard) depends on. Upstream
+# garrytan/gbrain is stdio-only (no HTTP) — using it makes lpam-backend crash-loop.
+GBRAIN_REPO="${GBRAIN_REPO:-https://github.com/DYAI2025/gbrain.git}"
 ATLAS_REPO="${ATLAS_REPO:-https://github.com/DYAI2025/gbrain-atlas.git}"
 PLUMBLINE_REPO="${PLUMBLINE_REPO:-https://github.com/DYAI2025/Plumbline.git}"
 PLUMBLINE_DIR="${PLUMBLINE_DIR:-/root/Plumbline}"
@@ -18,7 +22,7 @@ echo "Setting up LPAM (GBrain + gbrain-atlas + Plumbline + Obsidian vault harnes
 command -v git >/dev/null || { echo "git is required" >&2; exit 1; }
 command -v bun >/dev/null || { echo "bun is required. Install from https://bun.sh first." >&2; exit 1; }
 
-# Backend: clone Garry Tan's upstream GBrain core engine.
+# Backend: clone the GBrain core engine (DYAI2025/gbrain fork — HTTP MCP capable).
 echo "Setting up GBrain backend from $GBRAIN_REPO..."
 rm -rf backend
 git clone "$GBRAIN_REPO" backend
